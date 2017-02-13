@@ -544,6 +544,9 @@ class CLBacterium:
         self.sorted_ids_dev.set(self.sorted_ids) # push changes to the device
         self.sq_inds_dev.set(self.sq_inds)
 
+        # Penalty weight
+        self.pen_weight = 0.1
+
         self.n_cts = 0
         self.vcleari(self.cell_n_cts_dev) # clear the accumulated contact count
         self.sub_tick_i=0
@@ -568,11 +571,13 @@ class CLBacterium:
 
         self.sub_tick_i += 1
         new_cts = self.n_cts - old_n_cts
-        if (new_cts>0 or self.sub_tick_i==0) and self.sub_tick_i<self.max_substeps:
+        #if (new_cts>0 or self.sub_tick_i==0) and self.sub_tick_i<self.max_substeps:
+        if  self.sub_tick_i<self.max_substeps:
             self.build_matrix() # Calculate entries of the matrix
             #print "max cell contacts = %i"%cl_array.max(self.cell_n_cts_dev).get()
             self.CGSSolve(dt) # invert MTMx to find deltap
             self.add_impulse()
+            self.pen_weight *= 2.0
             return False
         else:
             return True
@@ -876,7 +881,7 @@ class CLBacterium:
                                       self.Minvx_dev.data).wait()
 
         #this was altered from dt*reg_param
-        self.vaddkx(Ax, self.reg_param, Ax, self.Minvx_dev).wait()
+        self.vaddkx(Ax, self.pen_weight, self.Minvx_dev, Ax).wait()
         # 1/math.sqrt(self.n_cells) removed from the reg_param NB
     
         #print(self.Minvx_dev)
@@ -943,8 +948,8 @@ class CLBacterium:
             rsnew = self.vdot(self.res_dev[0:self.n_cells], self.res_dev[0:self.n_cells]).get()
 
             # Test for convergence
-            if math.sqrt(rsnew/self.n_cells) < self.cgs_tol:
-            #if math.sqrt(rsnew/rsfirst) < self.cgs_tol:
+            #if math.sqrt(rsnew/self.n_cells) < self.cgs_tol:
+            if math.sqrt(rsnew/rsfirst) < self.cgs_tol:
                 break
 
             # Stopped converging -> terminate
