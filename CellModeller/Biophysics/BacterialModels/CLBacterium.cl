@@ -485,8 +485,8 @@ __kernel void find_contacts(const int max_cells,
               dists[ct_i] = dist;
               pts[ct_i] = pt;
               norms[ct_i] = norm;
-              reldists[ct_i] = stiffness*RHS_FRAC*dist;
-              stiff[ct_i] = stiffness;
+              reldists[ct_i] = stiffness*RHS_FRAC*dist*overlap_length;
+              stiff[ct_i] = stiffness*overlap_length;
               overlap[ct_i] = overlap_length;
             }
 	}
@@ -496,8 +496,8 @@ __kernel void find_contacts(const int max_cells,
           dists[idx] = dist;
           pts[idx] = pt;
           norms[idx] = norm;
-          reldists[idx] = stiffness*RHS_FRAC*dist;
-          stiff[idx] = stiffness;
+          reldists[idx] = stiffness*RHS_FRAC*dist*overlap_length;
+          stiff[idx] = stiffness*overlap_length;
           overlap[idx]=overlap_length;
         }
 
@@ -511,7 +511,7 @@ __kernel void find_contacts(const int max_cells,
 	    pts[idx] = pt;
 	    norms[idx] = norm;*/
 	    reldists[idx] = 0.0;
-            stiff[idx] = 0.0;
+        stiff[idx] = stiffness*overlap_length; 
           overlap[idx]=overlap_length;
 	  }
 	  continue;
@@ -535,8 +535,8 @@ __kernel void find_contacts(const int max_cells,
               dists[ct_i] = dist;
               pts[ct_i] = pt;
               norms[ct_i] = norm;
-              reldists[ct_i] = stiffness*RHS_FRAC*dist;
-              stiff[ct_i] = stiffness;
+              reldists[ct_i] = stiffness*RHS_FRAC*dist*overlap_length;
+              stiff[ct_i] = stiffness*overlap_length;
               overlap[ct_i]=overlap_length;
             }
 	}
@@ -546,8 +546,8 @@ __kernel void find_contacts(const int max_cells,
           dists[idx] = dist;
           pts[idx] = pt;
           norms[idx] = norm;
-          reldists[idx] = stiffness*RHS_FRAC*dist;
-          stiff[idx] = stiffness;
+          reldists[idx] = stiffness*RHS_FRAC*dist*overlap_length;
+          stiff[idx] = stiffness*overlap_length;
           overlap[idx]=overlap_length;
         }
 

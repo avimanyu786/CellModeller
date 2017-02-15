@@ -34,7 +34,7 @@ def init(cell):
     # Specify mean and distribution of initial cell size
     cell.targetVol = 3.5 + random.uniform(0.0,0.5)
     # Specify growth rate of cells
-    cell.growthRate = 1.0
+    cell.growthRate = .25
     cell.color = cell_cols[cell.cellType]
 
 def update(cells):

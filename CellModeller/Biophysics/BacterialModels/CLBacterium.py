@@ -160,6 +160,10 @@ class CLBacterium:
                                             "float8 *res, const float k, const float8 *in1, const float8 *in2",
                                             "res[i] = in1[i] - k*in2[i]", "vecsubkx")
 
+        self.vnormsq = ElementwiseKernel(self.context,
+                                            "float8 *res, float8 *in",
+                                            "res[i] = (dot(in[i].s0123,in[i].s0123)+dot(in[i].s4567,in[i].s4567))", "vecnorm")
+
         # cell geometry kernels
         self.calc_cell_area = ElementwiseKernel(self.context, "float* res, float* r, float* l",
                                            "res[i] = 2.f*3.1415927f*r[i]*(2.f*r[i]+l[i])", "cell_area_kern")
@@ -277,6 +281,7 @@ class CLBacterium:
         self.p_dev = cl_array.zeros(self.queue, cell_geom, vec.float8)
         self.Ap_dev = cl_array.zeros(self.queue, cell_geom, vec.float8)
         self.res_dev = cl_array.zeros(self.queue, cell_geom, vec.float8)
+        self.res_norm_dev = cl_array.zeros(self.queue, cell_geom, numpy.float32)
         self.rhs_dev = cl_array.zeros(self.queue, cell_geom, vec.float8)
     
 
@@ -948,8 +953,11 @@ class CLBacterium:
             rsnew = self.vdot(self.res_dev[0:self.n_cells], self.res_dev[0:self.n_cells]).get()
 
             # Test for convergence
+            self.vnormsq(self.res_norm_dev,self.res_dev)
+            res_norm = self.res_norm_dev[0:self.n_cells].get()
+            if (numpy.max(res_norm) < self.cgs_tol**2):
             #if math.sqrt(rsnew/self.n_cells) < self.cgs_tol:
-            if math.sqrt(rsnew/rsfirst) < self.cgs_tol:
+            #if math.sqrt(rsnew/rsfirst) < self.cgs_tol:
                 break
 
             # Stopped converging -> terminate
@@ -963,7 +971,10 @@ class CLBacterium:
             #print '        ',iter,rsold
 
         if self.printing and self.frame_no%10==0:
-            print '% 5i'%self.frame_no + '% 6i cells  % 6i cts  % 6i iterations  residual = %f' % (self.n_cells, self.n_cts, iter+1, rsnew)
+            print '% 5i'%self.frame_no + '% 6i cells  % 6i cts  % 6i iterations  residual = %f' % (self.n_cells,
+            self.n_cts, iter+1, math.sqrt(rsnew/self.n_cells))
+            print 'Max res = %e'%(numpy.max(res_norm))
+            #print(res_norm)
         return (iter+1, math.sqrt(rsnew/self.n_cells))
 
 
