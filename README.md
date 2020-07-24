@@ -10,7 +10,7 @@ This branch is an attempt to replace NumPy and Math implementations on the exist
 
 ### Assuming CellModeller and CUDA 9.0 are already installed
 
-Using Conda to install CuPy would lead to a wipe-out of both CellModeller and PyOpenCL. To install CuPy within an existing CellModeller environment without affecting the existing CellModeller environment, we have to use Pip to install it instead of Conda.
+Using Conda to install CuPy would lead to a wipe-out of both CellModeller and PyOpenCL. To install CuPy within an existing CellModeller environment without affecting the existing CellModeller installation, we have to use Pip to install it instead of Conda.
 
 ```
 cd ~/cellmodeller
